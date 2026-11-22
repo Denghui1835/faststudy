@@ -1,4 +1,4 @@
-﻿:root {
+:root {
   --bg: #f6f3ec;
   --bg-2: #efeae0;
   --card: #ffffff;
@@ -72,7 +72,7 @@ p {
   margin: 0;
 }
 
-/* ================= 甯冨眬楠ㄦ灦 ================= */
+/* ================= Layout shell ================= */
 .shell {
   display: grid;
   grid-template-columns: 216px minmax(0, 1fr);
@@ -274,7 +274,7 @@ p {
   min-width: 0;
 }
 
-/* ================= 鍗＄墖 ================= */
+/* ================= Cards ================= */
 .card {
   background: var(--card);
   border-radius: var(--r-lg);
@@ -320,7 +320,7 @@ p {
   text-decoration: none;
 }
 
-/* ================= 椤堕儴闂€欙紙灞辫剦妯箙锛?================= */
+/* ================= Hero banner (greeting) ================= */
 .hello {
   position: relative;
   border-radius: var(--r-xl);
@@ -388,7 +388,7 @@ p {
   color: rgba(255, 255, 255, 0.78);
 }
 
-/* ================= 鐜舰杩涘害 ================= */
+/* ================= Donut / legend ================= */
 .donut-wrap {
   display: flex;
   align-items: center;
@@ -431,7 +431,7 @@ p {
   font-variant-numeric: tabular-nums;
 }
 
-/* ================= 浠婃棩浠诲姟 ================= */
+/* ================= Today tasks ================= */
 .task-row {
   display: flex;
   align-items: flex-start;
@@ -510,7 +510,7 @@ p {
   background: linear-gradient(90deg, var(--amber), #ffc978);
 }
 
-/* ================= 鏈€杩戝涔?/ 缁熻 ================= */
+/* ================= Recent & stats ================= */
 .recent {
   display: flex;
   gap: 14px;
@@ -582,7 +582,7 @@ p {
   color: var(--ink-3);
 }
 
-/* ================= 瀛︿範璺緞鏃堕棿杞?================= */
+/* ================= Learning path timeline ================= */
 .path {
   display: flex;
   align-items: flex-start;
@@ -675,7 +675,7 @@ p {
   font-weight: 700;
 }
 
-/* ================= 鎺屾彙搴︽潯 ================= */
+/* ================= Mastery bars ================= */
 .mastery-row {
   display: flex;
   align-items: center;
@@ -716,7 +716,7 @@ p {
   font-variant-numeric: tabular-nums;
 }
 
-/* ================= 鍒楄〃 ================= */
+/* ================= List rows ================= */
 .row-item {
   display: flex;
   align-items: center;
@@ -800,7 +800,7 @@ p {
   color: var(--blue);
 }
 
-/* ================= 鎸夐挳 ================= */
+/* ================= Buttons ================= */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -855,7 +855,7 @@ p {
   box-shadow: none;
 }
 
-/* ================= 寰界珷 / 鎻愮ず ================= */
+/* ================= Pills / notice ================= */
 .pill {
   display: inline-flex;
   align-items: center;
@@ -898,7 +898,7 @@ p {
   line-height: 1.6;
 }
 
-/* ================= 鍒烽 ================= */
+/* ================= Quiz ================= */
 .quiz-shell {
   max-width: 780px;
   margin: 0 auto;
@@ -1121,7 +1121,7 @@ p {
   line-height: 1.65;
 }
 
-/* ================= 寮曞椤?================= */
+/* ================= Onboarding ================= */
 .onboard {
   max-width: 760px;
   margin: 0 auto;
@@ -1297,7 +1297,7 @@ select:focus {
   border-color: var(--navy);
 }
 
-/* ================= 寮€鍏?================= */
+/* ================= Switch ================= */
 .switch {
   width: 44px;
   height: 25px;
@@ -1329,7 +1329,7 @@ select:focus {
   transform: translateX(19px);
 }
 
-/* ================= 鏉傞」 ================= */
+/* ================= Misc (rank / roadmap / empty) ================= */
 .muted {
   color: var(--ink-3);
   font-size: 11.5px;
@@ -1477,7 +1477,136 @@ select:focus {
   }
 }
 
-/* ================= 鍝嶅簲寮?================= */
+/* ================= Onboarding pitch ================= */
+.onboard-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 520px;
+  gap: 48px;
+  align-items: center;
+  max-width: 1180px;
+  margin: 0 auto;
+  width: 100%;
+  min-height: calc(100dvh - 120px);
+}
+
+.onboard-pitch {
+  min-width: 0;
+  padding: 8px 0;
+}
+
+.pitch-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.pitch-name {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.pitch-sub {
+  font-size: 11px;
+  color: var(--ink-3);
+  letter-spacing: 0.04em;
+}
+
+.pitch-title {
+  font-size: 44px;
+  line-height: 1.16;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  color: var(--navy);
+}
+
+.pitch-title em {
+  font-style: normal;
+  background: linear-gradient(100deg, #f2a33c, #e0653a);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.pitch-desc {
+  margin-top: 16px;
+  font-size: 14px;
+  color: var(--ink-2);
+  line-height: 1.75;
+  max-width: 420px;
+}
+
+.pitch-list {
+  margin-top: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.pitch-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.pitch-ico {
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  background: #fff;
+  border: 1px solid var(--line);
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+  flex: none;
+  box-shadow: var(--shadow);
+}
+
+.pitch-item b {
+  display: block;
+  font-size: 13.5px;
+  color: var(--navy);
+}
+
+.pitch-item span {
+  display: block;
+  font-size: 12.5px;
+  color: var(--ink-2);
+  line-height: 1.6;
+  margin-top: 1px;
+}
+
+.pitch-foot {
+  margin-top: 30px;
+  font-size: 11.5px;
+  color: var(--ink-3);
+  letter-spacing: 0.02em;
+}
+
+.only-mobile {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .onboard-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    min-height: 0;
+    max-width: 720px;
+  }
+  .onboard-pitch {
+    display: none;
+  }
+  .only-mobile {
+    display: block;
+  }
+  .hide-mobile {
+    display: none;
+  }
+}
+
+/* ================= Responsive ================= */
 @media (max-width: 1180px) {
   .dash {
     grid-template-columns: minmax(0, 1fr);

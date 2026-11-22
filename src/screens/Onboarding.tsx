@@ -25,20 +25,68 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
 
   return (
     <div className="main" style={{ paddingTop: 26 }}>
-      <div className="onboard">
-        <div className="topline">
-          <div>
-            <h1>FastStudy · 期末极限备考</h1>
-            <div className="sub">平时欠的知识，期末一起还。先花 30 秒告诉我你的处境。</div>
+      <div className="onboard-grid">
+        <aside className="onboard-pitch">
+          <div className="pitch-brand">
+            <div className="side-mark" style={{ width: 38, height: 38, borderRadius: 12 }}>
+              F
+            </div>
+            <div>
+              <div className="pitch-name">FastStudy</div>
+              <div className="pitch-sub">期末极限备考 · 农客松 2026</div>
+            </div>
           </div>
-          <div className="steps" style={{ width: 160, margin: 0 }}>
-            {[1, 2, 3].map((i) => (
-              <i key={i} className={i <= step ? 'on' : ''} />
-            ))}
+          <h1 className="pitch-title">
+            平时欠的知识，
+            <br />
+            <em>期末一起还。</em>
+          </h1>
+          <p className="pitch-desc">按「还剩几天考试」切换策略的 AI 备考小程序：时间变少，它就只给你最值钱的东西。</p>
+          <div className="pitch-list">
+            <div className="pitch-item">
+              <span className="pitch-ico">⏳</span>
+              <div>
+                <b>倒计时即策略</b>
+                <span>14 天以上系统重建，4–13 天定点爆破，3 天以内保命模式</span>
+              </div>
+            </div>
+            <div className="pitch-item">
+              <span className="pitch-ico">💬</span>
+              <div>
+                <b>先引导，再给答案</b>
+                <span>不会的题先讲思路，判错才讲「考什么 / 错在哪 / 记住哪一句」</span>
+              </div>
+            </div>
+            <div className="pitch-item">
+              <span className="pitch-ico">🧯</span>
+              <div>
+                <b>错题会自己消失</b>
+                <span>答错自动进急救本，答对一次就出本——错题本必须是会缩短的</span>
+              </div>
+            </div>
           </div>
-        </div>
+          <div className="pitch-foot">6 门课 · 82 道原创题 · 纯离线可用 · 模型算力自带</div>
+        </aside>
 
-        <div className="card pad-lg" style={{ marginTop: 16 }}>
+        <div className="onboard">
+          <div className="topline" style={{ marginBottom: 12 }}>
+            <div>
+              <h1 className="only-mobile" style={{ fontSize: 19 }}>
+                FastStudy
+              </h1>
+              <div className="sub only-mobile">期末极限备考 · 平时欠的知识，期末一起还。</div>
+              <div className="card-title hide-mobile" style={{ fontSize: 15 }}>
+                创建抢救计划
+              </div>
+            </div>
+            <div className="steps" style={{ width: 140, margin: 0 }}>
+              {[1, 2, 3].map((i) => (
+                <i key={i} className={i <= step ? 'on' : ''} />
+              ))}
+            </div>
+          </div>
+
+          <div className="card pad-lg">
           {step === 1 && (
             <>
               <div className="card-title" style={{ fontSize: 18 }}>
@@ -169,6 +217,7 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
                 生成抢救计划
               </button>
             )}
+          </div>
           </div>
         </div>
       </div>
