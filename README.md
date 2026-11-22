@@ -30,17 +30,18 @@ FastStudy 只解决一个问题：**用最短的时间，尽可能多拿分。**
 
 | 页面 | 内容 | 截图 |
 |---|---|---|
+| 引导 | 三步创建抢救计划（科目 / 天数 / 目标与基础），桌面版左侧带产品卖点 | [d-onboard](docs/shots/d-onboard.png) |
 | 首页 | 倒计时问候、学习进度环、今日任务、最近在刷、学习路径、掌握度、能力画像、迭代规划 | [d-home](docs/shots/d-home.png) |
 | 计划 | 当前策略、今日任务、今日考点、策略切换说明、保命模式开关 | [d-plan](docs/shots/d-plan.png) |
 | 题库 | 6 门课 · 考点清单（考频 / 已练 / 掌握度）· 单点练题 | [d-bank](docs/shots/d-bank.png) |
-| 刷题 | 引导 → 作答 → 判错讲解（考什么 / 错在哪 / 记住这一句）→ 本组诊断 | [d-quiz](docs/shots/d-quiz.png) |
+| 刷题 | 引导 → 作答 → 判错讲解（考什么 / 错在哪 / 记住这一句）→ 本组诊断 | [d-quiz-feedback](docs/shots/d-quiz-feedback.png) ｜ [本组结果](docs/shots/d-result.png) |
 | 进度 | 专注时长、刷题量、正确率、掌握度分布、能力雷达、考点明细 | [d-progress](docs/shots/d-progress.png) |
 | 错题 | 错题急救本，按考点聚合，答对自动出本 | [d-mistakes](docs/shots/d-mistakes.png) |
 | 我的 | 冲刺档案与段位、大模型接口配置、数据与版本 | [d-me](docs/shots/d-me.png) |
 
-手机上侧边栏自动变成底部 tab，卡片单列堆叠：[手机版首页](docs/shots/m-home.png) ｜ [手机版刷题](docs/shots/m-quiz.png)
+手机上侧边栏自动变成底部 tab，卡片单列堆叠：[手机版首页](docs/shots/m-home.png) ｜ [手机版刷题](docs/shots/m-quiz.png) ｜ [手机版引导](docs/shots/m-onboard.png)
 
-![刷题](docs/shots/d-quiz.png)
+![刷题](docs/shots/d-quiz-feedback.png)
 
 ## 核心功能（v0.1 已实现）
 
