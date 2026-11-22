@@ -8,16 +8,18 @@ import PlanPage from './screens/PlanPage';
 import Bank from './screens/Bank';
 import Progress from './screens/Progress';
 import Quiz from './screens/Quiz';
+import Exam from './screens/Exam';
 import Mistakes from './screens/Mistakes';
 import Profile from './screens/Profile';
 import './styles.css';
 
-type Tab = 'home' | 'plan' | 'bank' | 'progress' | 'mistakes' | 'me' | 'quiz';
+type Tab = 'home' | 'plan' | 'bank' | 'exam' | 'progress' | 'mistakes' | 'me' | 'quiz';
 
 const NAV: { id: Tab; icon: string; label: string }[] = [
   { id: 'home', icon: '🏠', label: '首页' },
   { id: 'plan', icon: '🗓️', label: '计划' },
   { id: 'bank', icon: '📚', label: '题库' },
+  { id: 'exam', icon: '⏱️', label: '模考' },
   { id: 'progress', icon: '📈', label: '进度' },
   { id: 'mistakes', icon: '🧯', label: '错题' },
   { id: 'me', icon: '👤', label: '我的' },
@@ -128,6 +130,10 @@ function Shell() {
         )}
 
         {tab === 'progress' && <Progress course={course} plan={plan} />}
+
+        {tab === 'exam' && (
+          <Exam course={course} onPractice={(kp) => start('normal', kp)} onGoMistakes={() => setTab('mistakes')} />
+        )}
 
         {tab === 'mistakes' && (
           <div className="col">

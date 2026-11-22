@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useReducer } from 'react';
 import type { Dispatch, ReactNode } from 'react';
 import type { ExamConfig, Progress } from './lib/plan';
 import type { AiSettings } from './lib/ai';
+import type { ExamRecord } from './lib/exam';
 
 export interface TodayState {
   date: string;
@@ -23,6 +24,8 @@ export interface State {
   streak: { count: number; last: string };
   lifesaver: boolean;
   settings: AiSettings;
+  /** 模拟考记录，新的在前 */
+  exams: ExamRecord[];
 }
 
 export type Action =
@@ -31,6 +34,8 @@ export type Action =
   | { type: 'lifesaver'; on: boolean }
   | { type: 'settings'; settings: AiSettings }
   | { type: 'clearMistakes' }
+  | { type: 'exam'; record: ExamRecord }
+  | { type: 'examMistakes'; qids: string[] }
   | { type: 'reset' }
   | { type: 'retake'; exam: ExamConfig };
 
@@ -52,6 +57,7 @@ const initialState: State = {
   streak: { count: 0, last: '' },
   lifesaver: false,
   settings: { baseUrl: '', apiKey: '', model: 'deepseek-chat' },
+  exams: [],
 };
 
 function bumpStreak(streak: State['streak']): State['streak'] {
@@ -111,6 +117,16 @@ function reducer(state: State, action: Action): State {
       return { ...state, settings: action.settings };
     case 'clearMistakes':
       return { ...state, mistakes: {} };
+    case 'exam':
+      return { ...state, exams: [action.record, ...(state.exams ?? [])].slice(0, 20) };
+    case 'examMistakes': {
+      // 考试里的错题也进急救本，但不计入手速/今日统计
+      const mistakes = { ...state.mistakes };
+      action.qids.forEach((id) => {
+        mistakes[id] = (mistakes[id] ?? 0) + 1;
+      });
+      return { ...state, mistakes };
+    }
     case 'reset':
       return { ...initialState, today: emptyToday() };
     default:
