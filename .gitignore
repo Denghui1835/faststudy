@@ -26,3 +26,5 @@ dist-ssr
 # local
 .shots
 *.local.*
+# 安卓安装包（放 GitHub Release，不入库）
+release/

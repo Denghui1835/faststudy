@@ -1,12 +1,31 @@
 # FastStudy · 大学生期末极限备考
 
 > 平时欠的知识，期末一起还。
-> 按「还剩几天考试」切换教学策略的 AI 备考小程序（桌面仪表盘 + 手机 H5 自适应，为微信小程序预留）。
+> 按「还剩几天考试」切换教学策略的 AI 备考 App：网页版（桌面仪表盘 + 手机自适应）+ **安卓安装包**。
 
 **在线 Demo**：<https://denghui1835.github.io/faststudy/>
 **带演示数据直达**：<https://denghui1835.github.io/faststudy/?demo=1>
+**安卓 APK（9.5 MB）**：<https://github.com/denghui1835/faststudy/releases/latest/download/FastStudy-v0.1-android.apk>
 
 ![首页](docs/shots/d-home.png)
+
+---
+
+## 三个入口，同一套代码
+
+| 入口 | 怎么用 | 说明 |
+|---|---|---|
+| 🌐 网页版 | 直接打开 Demo 链接 | 桌面是仪表盘，手机自动切成底部 tab |
+| 📱 安卓 APK | 下载安装（Android 7.0+） | Capacitor 打包的同一套 H5，**纯离线可用**，图标/启动图已定制 |
+| 📦 源码 | `npm install && npm run dev` | 纯静态，无后端 |
+
+安卓版实机截图（模拟器 Android 16 / 1080×2400）：
+
+<p>
+  <img src="docs/shots/android-onboard.png" width="260" alt="安卓-引导" />
+  <img src="docs/shots/android-home.png" width="260" alt="安卓-首页" />
+  <img src="docs/shots/android-feedback.png" width="260" alt="安卓-刷题" />
+</p>
 
 ---
 

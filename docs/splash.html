@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body {
+        width: 1080px; height: 1920px; overflow: hidden; position: relative;
+        background: linear-gradient(160deg, #24365c 0%, #1b2b4b 46%, #0f1830 100%);
+        font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        gap: 46px;
+      }
+      .glow {
+        position: absolute; width: 1100px; height: 1100px; border-radius: 50%;
+        background: radial-gradient(circle, rgba(59,107,245,.34), transparent 62%);
+        top: -300px; left: -280px;
+      }
+      .mark {
+        position: relative; width: 300px; height: 300px; border-radius: 88px;
+        background: linear-gradient(145deg, #3b6bf5, #7b61ff);
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 40px 90px -30px rgba(0,0,0,.7);
+      }
+      .mark span { font-size: 186px; font-weight: 800; color: #fff; letter-spacing: -8px; transform: translateY(-4px); }
+      .name { position: relative; font-size: 66px; font-weight: 800; color: #fff; letter-spacing: -1px; }
+      .slogan { position: relative; font-size: 30px; color: rgba(255,255,255,.62); letter-spacing: 2px; }
+      .foot { position: absolute; bottom: 110px; font-size: 24px; color: rgba(255,255,255,.34); letter-spacing: 4px; }
+    </style>
+  </head>
+  <body>
+    <div class="glow"></div>
+    <div class="mark"><span>F</span></div>
+    <div class="name">FastStudy</div>
+    <div class="slogan">平时欠的知识，期末一起还</div>
+    <div class="foot">期末极限备考</div>
+  </body>
+</html>

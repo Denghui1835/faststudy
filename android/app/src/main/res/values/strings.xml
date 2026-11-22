@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">FastStudy</string>
+    <string name="title_activity_main">FastStudy</string>
+    <string name="package_name">com.denghui.faststudy</string>
+    <string name="custom_url_scheme">com.denghui.faststudy</string>
+</resources>
