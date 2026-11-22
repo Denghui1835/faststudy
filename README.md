@@ -27,6 +27,10 @@
   <img src="docs/shots/android-feedback.png" width="260" alt="安卓-刷题" />
 </p>
 
+想直接扫码体验 / 拉票转发，用这张图（网页版、APK、源码三个码都在）：
+
+![扫码体验](docs/二维码.png)
+
 ---
 
 ## 这是什么
