@@ -1,6 +1,8 @@
 // 通用截图：node scripts/shot.mjs <url> <out.png> [w] [h] [mobile:0|1] [clickText]
 import { spawn } from 'node:child_process';
-import { writeFileSync } from 'node:fs';
+import { mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 const url = process.argv[2];
@@ -10,9 +12,10 @@ const h = Number(process.argv[5] ?? 900);
 const mobile = (process.argv[6] ?? '0') === '1';
 const clickText = process.argv[7] ?? '';
 
+const profile = mkdtempSync(join(tmpdir(), 'shot-'));
 const chrome = spawn(CHROME, [
   '--headless=new', '--disable-gpu', '--hide-scrollbars', '--no-first-run',
-  '--remote-debugging-port=9488', `--user-data-dir=${process.env.TEMP}\\shot-profile-${w}`,
+  '--remote-debugging-port=9488', `--user-data-dir=${profile}`,
   `--window-size=${w},${h}`, url,
 ], { stdio: 'ignore' });
 

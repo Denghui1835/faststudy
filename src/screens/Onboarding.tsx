@@ -25,20 +25,20 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
 
   return (
     <div className="main" style={{ paddingTop: 26 }}>
-      <div className="topline">
-        <div>
-          <h1>FastStudy · 期末极限备考</h1>
-          <div className="sub">平时欠的知识，期末一起还。先花 30 秒告诉我你的处境。</div>
-        </div>
-        <div className="steps" style={{ width: 160, margin: 0 }}>
-          {[1, 2, 3].map((i) => (
-            <i key={i} className={i <= step ? 'on' : ''} />
-          ))}
-        </div>
-      </div>
-
       <div className="onboard">
-        <div className="card pad-lg">
+        <div className="topline">
+          <div>
+            <h1>FastStudy · 期末极限备考</h1>
+            <div className="sub">平时欠的知识，期末一起还。先花 30 秒告诉我你的处境。</div>
+          </div>
+          <div className="steps" style={{ width: 160, margin: 0 }}>
+            {[1, 2, 3].map((i) => (
+              <i key={i} className={i <= step ? 'on' : ''} />
+            ))}
+          </div>
+        </div>
+
+        <div className="card pad-lg" style={{ marginTop: 16 }}>
           {step === 1 && (
             <>
               <div className="card-title" style={{ fontSize: 18 }}>
