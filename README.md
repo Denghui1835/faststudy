@@ -5,7 +5,7 @@
 
 **在线 Demo**：<https://denghui1835.github.io/faststudy/>
 **带演示数据直达**：<https://denghui1835.github.io/faststudy/?demo=1>
-**安卓 APK（9.5 MB）**：<https://github.com/denghui1835/faststudy/releases/latest/download/FastStudy-v0.1-android.apk>
+**安卓 APK（9.6 MiB）**：<https://github.com/denghui1835/faststudy/releases/latest/download/FastStudy-v0.1-android.apk>
 
 ![首页](docs/shots/d-home.png)
 
