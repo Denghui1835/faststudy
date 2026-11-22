@@ -257,11 +257,11 @@ export default function Dashboard({
           <div className="path">
             {course.kps.map((kp, i) => {
               const o = plan.order.find((x) => x.kp.id === kp.id);
-              const st = !o || o.seen === 0 ? 'lock' : o.mastery >= 0.7 ? 'done' : 'now';
+              const st = o && o.seen > 0 ? (o.mastery >= 0.7 ? 'done' : 'now') : i === firstPending ? 'now' : 'lock';
               return (
                 <div key={kp.id} className={`path-node ${st === 'lock' ? 'lock' : st}`}>
                   {i === firstPending && <span className="badge-now">当前</span>}
-                  <div className="path-dot">{st === 'done' ? '✓' : st === 'lock' ? '🔒' : i + 1}</div>
+                  <div className="path-dot">{st === 'done' ? '✓' : i + 1}</div>
                   <div className="path-label">{shortName(kp.name)}</div>
                 </div>
               );

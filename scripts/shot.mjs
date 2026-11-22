@@ -42,14 +42,20 @@ await send('Page.reload');
 await sleep(1500);
 
 if (clickText) {
-  const r = await evalJs(`(() => {
-    const t = ${JSON.stringify(clickText)};
-    const els = [...document.querySelectorAll('button')].filter(b => (b.innerText||'').includes(t));
-    if (!els.length) return 'not found';
-    els[0].click();
-    return 'clicked: ' + els[0].innerText.replace(/\\s+/g,' ').slice(0, 24);
-  })()`);
-  console.log(r);
+  if (clickText.startsWith('js:')) {
+    const code = clickText.slice(3);
+    const r = await evalJs(`(async () => { ${code} })()`);
+    console.log('js =>', JSON.stringify(r)?.slice(0, 140));
+  } else {
+    const r = await evalJs(`(() => {
+      const t = ${JSON.stringify(clickText)};
+      const els = [...document.querySelectorAll('button')].filter(b => (b.innerText||'').includes(t));
+      if (!els.length) return 'not found';
+      els[0].click();
+      return 'clicked: ' + els[0].innerText.replace(/\\s+/g,' ').slice(0, 24);
+    })()`);
+    console.log(r);
+  }
   await sleep(1200);
 }
 
