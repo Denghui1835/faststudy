@@ -65,7 +65,7 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
               </div>
             </div>
           </div>
-          <div className="pitch-foot">6 门课 · 84 道原创题 · 纯离线可用 · 模型算力自带</div>
+          <div className="pitch-foot">8 门课 · 152 道原创题 · 纯离线可用 · 模型算力自带</div>
         </aside>
 
         <div className="onboard">
