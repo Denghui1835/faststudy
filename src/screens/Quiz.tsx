@@ -7,7 +7,15 @@ import { useStore } from '../store';
 
 const LETTERS = ['A', 'B', 'C', 'D', 'E'];
 
-function buildQueue(course: Course, plan: Plan, progress: Record<string, { seen: number; correct: number; wrong: number }>, mistakes: Record<string, number>, mode: 'normal' | 'review', size = 10): Question[] {
+function buildQueue(
+  course: Course,
+  plan: Plan,
+  progress: Record<string, { seen: number; correct: number; wrong: number }>,
+  mistakes: Record<string, number>,
+  mode: 'normal' | 'review',
+  kpFilter?: string,
+  size = 10,
+): Question[] {
   const byId = new Map(course.questions.map((q) => [q.id, q]));
   if (mode === 'review') {
     return Object.entries(mistakes)
@@ -16,15 +24,18 @@ function buildQueue(course: Course, plan: Plan, progress: Record<string, { seen:
       .filter((q): q is Question => Boolean(q))
       .slice(0, size);
   }
-  const heatOf = (qid: string) => course.kps.find((k) => k.id === byId.get(qid)?.kp)?.heat ?? 1;
-  const pool = plan.mode === 'lifesaver' ? course.questions.filter((q) => heatOf(q.id) >= 2 && q.diff <= 2) : course.questions;
+  const heatOf = (q: Question) => course.kps.find((k) => k.id === q.kp)?.heat ?? 1;
+  let pool = course.questions;
+  if (kpFilter) pool = pool.filter((q) => q.kp === kpFilter);
+  else if (plan.mode === 'lifesaver') pool = pool.filter((q) => heatOf(q) >= 2 && q.diff <= 2);
+  if (pool.length === 0) pool = course.questions;
+
   const scored = pool.map((q) => {
     const st = progress[q.id];
     const wrong = mistakes[q.id] ? 1 : 0;
     const perQ = st && st.seen > 0 ? st.correct / st.seen : -1;
     const freshness = st && st.seen > 0 ? (perQ >= 0.8 ? 0 : 2) : 4;
-    const heat = heatOf(q.id);
-    return { q, score: heat * 10 + freshness * 6 + wrong * 9 + (3 - q.diff) * 2 };
+    return { q, score: heatOf(q) * 10 + freshness * 6 + wrong * 9 + (3 - q.diff) * 2 };
   });
   scored.sort((a, b) => b.score - a.score);
   return scored.slice(0, size).map((s) => s.q);
@@ -36,22 +47,23 @@ export default function Quiz({
   course,
   plan,
   mode,
+  kpFilter,
   onExit,
   onGoMistakes,
 }: {
   course: Course;
   plan: Plan;
   mode: 'normal' | 'review';
+  kpFilter?: string;
   onExit: () => void;
   onGoMistakes: () => void;
 }) {
   const { state, dispatch } = useStore();
   const [seed, setSeed] = useState(0);
   const queue = useMemo(
-    () => buildQueue(course, plan, state.progress, state.mistakes, mode),
-    // 换一组时重新抽题
+    () => buildQueue(course, plan, state.progress, state.mistakes, mode, kpFilter),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [course, plan.mode, mode, seed],
+    [course, plan.mode, mode, kpFilter, seed],
   );
 
   const [idx, setIdx] = useState(0);
@@ -71,23 +83,25 @@ export default function Quiz({
 
   if (!q || finished) {
     return (
-      <Result
-        items={items}
-        course={course}
-        onAgain={() => {
-          setSeed((s) => s + 1);
-          setIdx(0);
-          setPicked([]);
-          setSubmitted(false);
-          setShowHint(false);
-          setItems([]);
-          setFinished(false);
-          setAiText('');
-          startedAt.current = Date.now();
-        }}
-        onGoMistakes={onGoMistakes}
-        onExit={onExit}
-      />
+      <div className="quiz-shell">
+        <Result
+          items={items}
+          course={course}
+          onAgain={() => {
+            setSeed((s) => s + 1);
+            setIdx(0);
+            setPicked([]);
+            setSubmitted(false);
+            setShowHint(false);
+            setItems([]);
+            setFinished(false);
+            setAiText('');
+            startedAt.current = Date.now();
+          }}
+          onGoMistakes={onGoMistakes}
+          onExit={onExit}
+        />
+      </div>
     );
   }
 
@@ -138,52 +152,50 @@ export default function Quiz({
     setAiBusy(true);
     setAiText('');
     try {
-      const text = await askLLM(state.settings, q, kp.name, picked);
-      setAiText(text);
-    } catch (e) {
+      setAiText(await askLLM(state.settings, q, kp.name, picked));
+    } catch {
       setAiText(
         `（本地讲解）你选的是「${picked.map((i) => q.options[i]).join('、') || '空'}」，正确答案是「${q.answer
           .map((i) => q.options[i])
           .join('、')}」。${q.explain.why}`,
       );
-      void e;
     } finally {
       setAiBusy(false);
     }
   };
 
   const correctNow = submitted && eq([...picked].sort(), q.answer);
+  const pct = Math.round(((idx + (submitted ? 1 : 0)) / queue.length) * 100);
 
   return (
-    <div className="screen" style={{ paddingBottom: 40 }}>
+    <div className="quiz-shell">
       {comboText && <div className="combo">{comboText}</div>}
 
-      <div className="between" style={{ marginBottom: 4 }}>
-        <button className="icon-btn" onClick={onExit} aria-label="退出">
-          ←
-        </button>
-        <div className="card-note">
-          第 {idx + 1} / {queue.length} 题 · 已练 {fmtClock(items.reduce((n, i) => n + i.seconds, 0))}
+      <div className="card">
+        <div className="quiz-progress">
+          <button className="btn btn-sm" onClick={onExit}>
+            ← 退出
+          </button>
+          <div style={{ flex: 1 }}>
+            <div className="bar" style={{ marginBottom: 6 }}>
+              <i style={{ width: `${pct}%` }} />
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span>
+                第 {idx + 1} / {queue.length} 题
+              </span>
+              <span>{combo >= 2 ? `🔥 连击 ${combo}` : `已练 ${fmtClock(items.reduce((n, i) => n + i.seconds, 0))}`}</span>
+            </div>
+          </div>
+          <span className="pill blue">{q.type === 'multi' ? '多选' : q.type === 'judge' ? '判断' : '单选'}</span>
         </div>
-        <div className="card-note">
-          {combo >= 2 ? `🔥 ${combo}` : `${Math.round(((idx + (submitted ? 1 : 0)) / queue.length) * 100)}%`}
-        </div>
-      </div>
 
-      <div className="hero-bar" style={{ background: 'rgba(19,29,51,.08)', marginTop: 6 }}>
-        <i
-          style={{
-            width: `${((idx + (submitted ? 1 : 0)) / queue.length) * 100}%`,
-            background: 'linear-gradient(90deg,var(--violet),#8b95ff)',
-          }}
-        />
-      </div>
-
-      <div className="q-wrap">
-        <div className="q-meta">
-          <span className="q-type">{q.type === 'multi' ? '多选' : q.type === 'judge' ? '判断' : '单选'}</span>
-          <span>{kp?.name}</span>
-          {kp && <span className={`heat ${kp.heat === 2 ? 'mid' : kp.heat === 1 ? 'low' : ''}`}>{kp.heat === 3 ? '高频' : kp.heat === 2 ? '常考' : '了解'}</span>}
+        <div className="row-meta" style={{ marginTop: 14 }}>
+          <span className="q-type">{kp?.chapter}</span>
+          <span style={{ fontWeight: 700, color: '#5a6b87' }}>{kp?.name}</span>
+          <span className={`heat ${kp?.heat === 2 ? 'mid' : kp?.heat === 1 ? 'low' : ''}`}>
+            {kp?.heat === 3 ? '高频' : kp?.heat === 2 ? '常考' : '了解'}
+          </span>
         </div>
 
         <div className="q-stem">{q.stem}</div>
@@ -197,9 +209,7 @@ export default function Quiz({
               if (isRight) cls += ' ok';
               else if (isPicked) cls += ' bad';
               else cls += ' dim';
-            } else if (isPicked) {
-              cls += ' sel';
-            }
+            } else if (isPicked) cls += ' sel';
             return (
               <button key={i} className={cls} onClick={() => toggle(i)}>
                 <span className="opt-key">{LETTERS[i]}</span>
@@ -210,12 +220,12 @@ export default function Quiz({
         </div>
 
         {!submitted && (
-          <div className="footbar">
-            <button className="btn btn-ghost" onClick={() => setShowHint((v) => !v)} style={{ marginBottom: 9 }}>
+          <div style={{ display: 'flex', gap: 9, marginTop: 14 }}>
+            <button className="btn" style={{ flex: 1 }} onClick={() => setShowHint((v) => !v)}>
               {showHint ? '收起思路' : '不会，先讲讲思路'}
             </button>
             {q.type === 'multi' && (
-              <button className="btn btn-primary" disabled={picked.length === 0} onClick={() => submit(picked)}>
+              <button className="btn btn-primary" style={{ flex: 1 }} disabled={picked.length === 0} onClick={() => submit(picked)}>
                 提交答案
               </button>
             )}
@@ -237,41 +247,39 @@ export default function Quiz({
           <>
             <div className={`verdict ${correctNow ? 'ok' : 'bad'}`}>
               {correctNow ? '✓ 对了' : '✕ 答错了'}
-              <span style={{ fontWeight: 500, fontSize: 12.5, opacity: 0.75, marginLeft: 'auto' }}>
+              <span style={{ fontWeight: 500, fontSize: 12, opacity: 0.8, marginLeft: 'auto' }}>
                 正确答案 {q.answer.map((i) => LETTERS[i]).join('、')}
               </span>
             </div>
 
-            <div className="explain">
-              <div className="exp-row">
-                <div className="exp-badge">考什么</div>
+            <div className="exp-grid">
+              <div className="exp-cell">
+                <div className="exp-tag">考什么</div>
                 <div className="exp-text">{q.explain.what}</div>
               </div>
-              <div className="exp-row">
-                <div className="exp-badge">错在哪</div>
+              <div className="exp-cell">
+                <div className="exp-tag">错在哪</div>
                 <div className="exp-text">{q.explain.why}</div>
               </div>
             </div>
 
             <div className="keep">
               <span>记住这一句</span>
-              {q.explain.keep}
+              <b>{q.explain.keep}</b>
             </div>
 
-            <div className="row" style={{ gap: 9, marginTop: 12 }}>
+            <div style={{ display: 'flex', gap: 9, marginTop: 12, alignItems: 'center' }}>
               <button className="btn btn-sm" onClick={askAi} disabled={aiBusy}>
                 {aiBusy ? 'AI 正在想…' : '🤖 让 AI 再讲一遍'}
               </button>
-              {q.year && <span className="card-note">{q.year} 年考过</span>}
+              {q.year && <span className="muted">{q.year} 年考过</span>}
             </div>
 
             {aiText && <div className="bubble">{aiText}</div>}
 
-            <div className="footbar">
-              <button className="btn btn-primary" onClick={next}>
-                {idx + 1 >= queue.length ? '看本组结果' : '下一题 →'}
-              </button>
-            </div>
+            <button className="btn btn-primary btn-wide" style={{ marginTop: 14 }} onClick={next}>
+              {idx + 1 >= queue.length ? '看本组结果' : '下一题 →'}
+            </button>
           </>
         )}
       </div>
@@ -301,60 +309,73 @@ function Result({
   const secs = items.reduce((n, i) => n + i.seconds, 0);
 
   return (
-    <div className="screen">
-      <div className="between" style={{ marginBottom: 10 }}>
-        <button className="icon-btn" onClick={onExit} aria-label="返回">
-          ←
-        </button>
-        <div className="card-note">本组完成</div>
-        <div style={{ width: 34 }} />
-      </div>
-
-      <div className="hero">
-        <div className="hero-top">
-          <span>本组战绩</span>
-          <span className="hero-tag">{fmtClock(secs)}</span>
+    <>
+      <div className="card">
+        <div className="card-head">
+          <div className="card-title">
+            <span className="ico">🏁</span>本组完成
+          </div>
+          <button className="btn btn-sm" onClick={onExit}>
+            回到首页
+          </button>
         </div>
-        <div className="countdown">
-          <span className="countdown-num">{acc}</span>
-          <span className="countdown-unit">% 正确率</span>
-        </div>
-        <div className="hero-line">
-          {right} / {total} 题答对，平均每题 {Math.round(secs / Math.max(1, total))} 秒
+        <div className="stats3">
+          <div className="stat-box">
+            <b style={{ color: acc >= 80 ? '#23b26d' : acc >= 60 ? '#1b2b4b' : '#e04b4b' }}>{acc}%</b>
+            <span>正确率</span>
+          </div>
+          <div className="stat-box">
+            <b>
+              {right}/{total}
+            </b>
+            <span>答对题数</span>
+          </div>
+          <div className="stat-box">
+            <b>{fmtClock(secs)}</b>
+            <span>总用时</span>
+          </div>
+          <div className="stat-box">
+            <b>{Math.round(secs / Math.max(1, total))}s</b>
+            <span>平均每题</span>
+          </div>
         </div>
       </div>
 
       <div className="card">
         <div className="card-head">
-          <div className="card-title">{report.title}</div>
-          <div className="card-note">AI 诊断</div>
+          <div className="card-title">
+            <span className="ico">🤖</span>{report.title}
+          </div>
+          <span className="card-note">AI 诊断</span>
         </div>
         {report.lines.map((l, i) => (
-          <div key={i} className="exp-text" style={{ marginBottom: 8 }}>
+          <div key={i} className="exp-text" style={{ marginBottom: 7 }}>
             · {l}
           </div>
         ))}
         <div className="keep">
           <span>下一步动作</span>
-          {report.action}
+          <b>{report.action}</b>
         </div>
       </div>
 
       {wrongIds.length > 0 && (
         <div className="card">
           <div className="card-head">
-            <div className="card-title">这组错的题</div>
-            <div className="card-note">已进错题急救本</div>
+            <div className="card-title">
+              <span className="ico">🧯</span>这组错的题
+            </div>
+            <span className="card-note">已进错题急救本</span>
           </div>
           {wrongIds.map((id) => {
             const q = byId.get(id);
             if (!q) return null;
             return (
-              <div className="kprow" key={id}>
-                <div className="kp-index hot">✕</div>
-                <div className="kp-main">
-                  <div className="kp-name">{q.stem.slice(0, 22)}…</div>
-                  <div className="kp-meta">{q.explain.keep.slice(0, 26)}…</div>
+              <div className="row-item" key={id}>
+                <div className="idx hot">✕</div>
+                <div className="row-main">
+                  <div className="row-title">{q.stem}</div>
+                  <div className="row-meta">记住：{q.explain.keep}</div>
                 </div>
               </div>
             );
@@ -362,14 +383,14 @@ function Result({
         </div>
       )}
 
-      <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 9 }}>
-        <button className="btn btn-primary" onClick={onAgain}>
+      <div style={{ display: 'flex', gap: 10 }}>
+        <button className="btn btn-primary" style={{ flex: 1 }} onClick={onAgain}>
           再来一组
         </button>
-        <button className="btn" onClick={onGoMistakes}>
+        <button className="btn" style={{ flex: 1 }} onClick={onGoMistakes}>
           去错题急救本
         </button>
       </div>
-    </div>
+    </>
   );
 }
