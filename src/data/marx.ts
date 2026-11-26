@@ -156,6 +156,11 @@ export const marxism: Course = {
   name: '马克思主义基本原理',
   short: '马原',
   color: '#E03131',
+  source: {
+    school: '多校通用',
+    tag: '通用',
+    basis: '公开教材 · 统考与期末常见题型，非某校真题',
+  },
   kps,
   questions,
 };

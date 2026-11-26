@@ -2058,3 +2058,278 @@ mark.hl {
   }
 }
 
+
+/* ── 资料出处 / 三级分面 / 收藏 / 资料原稿 ─────────────────────────── */
+.src-local {
+  color: var(--navy);
+}
+
+.sr-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.sr-row .sr-head {
+  flex: 1;
+  min-width: 0;
+}
+.sr-side {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.fav-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  font-size: 15px;
+  line-height: 1;
+  color: #c7cbd6;
+  transition: all 0.15s;
+}
+.fav-btn:hover {
+  background: #fdf0f4;
+  color: #e64980;
+}
+.fav-btn.on {
+  color: #e64980;
+}
+
+.sr-src {
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: #eef2f8;
+  color: var(--ink-2);
+  font-size: 10px;
+  font-weight: 800;
+}
+.sr-src.local {
+  background: #fff1e6;
+  color: #c2410c;
+}
+
+.facet-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin: 10px 0 2px;
+}
+.facet-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.facet-label {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--ink-3);
+}
+.facet {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 99px;
+  border: 1.5px solid var(--line);
+  background: #fff;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--ink-2);
+  transition: all 0.15s;
+}
+.facet:hover {
+  border-color: var(--line-2);
+}
+.facet em {
+  font-style: normal;
+  font-size: 10px;
+  color: var(--ink-3);
+}
+.facet.on {
+  border-color: var(--navy);
+  background: var(--navy);
+  color: #fff;
+}
+.facet.on em {
+  color: rgba(255, 255, 255, 0.7);
+}
+.facet.fav.on {
+  border-color: #d6336c;
+  background: #d6336c;
+}
+
+.mat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.mat-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1.5px solid var(--line);
+  border-radius: var(--r-md);
+  background: #fdfcf9;
+}
+.mat-kind {
+  flex: none;
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-size: 10.5px;
+  font-weight: 800;
+  background: #eef2f8;
+  color: var(--ink-2);
+}
+.mat-kind.paper {
+  background: #fff1e6;
+  color: #c2410c;
+}
+.mat-kind.answer {
+  background: var(--green-soft);
+  color: #0a7d4f;
+}
+.mat-kind.slides {
+  background: var(--violet-soft);
+  color: #5546c9;
+}
+.mat-main {
+  flex: 1;
+  min-width: 0;
+}
+.mat-title {
+  font-size: 12.5px;
+  font-weight: 800;
+}
+.mat-note {
+  font-size: 11.5px;
+  color: var(--ink-2);
+  line-height: 1.65;
+  margin-top: 3px;
+}
+.mat-actions {
+  flex: none;
+  display: flex;
+  gap: 6px;
+}
+
+@media (max-width: 860px) {
+  .mat-row {
+    flex-wrap: wrap;
+  }
+  .mat-actions {
+    width: 100%;
+  }
+  .facet-bar {
+    gap: 6px 12px;
+  }
+}
+.src-line {
+  margin-top: 4px;
+  font-size: 11.5px;
+  color: var(--ink-2);
+  line-height: 1.6;
+}
+.src-line b {
+  font-weight: 800;
+  color: var(--ink);
+}
+/* ── 计划页 · 课程总览 ─────────────────────────────────────────── */
+.ov-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ov-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  padding: 9px 10px;
+  border-radius: var(--r-md);
+  border: 1.5px solid transparent;
+  transition: all 0.15s;
+}
+.ov-row:hover {
+  background: #faf8f2;
+  border-color: var(--line);
+}
+.ov-row.on {
+  background: var(--blue-soft);
+  border-color: #cfd9ff;
+}
+.ov-dot {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 800;
+}
+.ov-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ov-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 800;
+}
+.ov-src {
+  font-style: normal;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: #eef2f8;
+  color: var(--ink-3);
+}
+.ov-src.local {
+  background: #fff1e6;
+  color: #c2410c;
+}
+.ov-meta {
+  font-size: 11px;
+  color: var(--ink-3);
+}
+.ov-stat {
+  flex: none;
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ov-stat b {
+  font-size: 14px;
+  font-weight: 800;
+}
+.ov-stat i {
+  font-style: normal;
+  font-size: 10.5px;
+  color: var(--ink-3);
+}
+
+@media (max-width: 860px) {
+  .ov-stat b {
+    font-size: 13px;
+  }
+  .ov-meta {
+    font-size: 10.5px;
+  }
+  .ov-row {
+    gap: 9px;
+    padding: 8px 6px;
+  }
+}

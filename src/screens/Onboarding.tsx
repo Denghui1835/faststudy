@@ -109,7 +109,8 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
                     </div>
                     <div className="course-name">{c.name}</div>
                     <div className="course-sub">
-                      {c.kps.length} 个考点 · {c.questions.length} 题
+                      {c.kps.length} 个考点 · {c.questions.length} 题 ·{' '}
+                      <span className={c.source.local ? 'src-local' : ''}>{c.source.tag}</span>
                     </div>
                   </button>
                 ))}

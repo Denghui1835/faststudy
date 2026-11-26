@@ -127,6 +127,11 @@ export const linearAlgebra: Course = {
   name: '线性代数',
   short: '线代',
   color: '#12B886',
+  source: {
+    school: '多校通用',
+    tag: '通用',
+    basis: '公开教材 · 统考与期末常见题型，非某校真题',
+  },
   kps,
   questions,
 };

@@ -1,4 +1,5 @@
 import type { Course } from '../data/types';
+import { courses } from '../data';
 import { BASIS_LABEL, MODE_META, type Mode } from '../lib/plan';
 import type { Plan } from '../lib/plan';
 import { useStore } from '../store';
@@ -14,11 +15,13 @@ export default function PlanPage({
   plan,
   onStart,
   onRetake,
+  onSwitchCourse,
 }: {
   course: Course;
   plan: Plan;
   onStart: () => void;
   onRetake: () => void;
+  onSwitchCourse: (id: string) => void;
 }) {
   const { state, dispatch } = useStore();
   const exam = state.exam!;
@@ -29,13 +32,98 @@ export default function PlanPage({
     items: rest.slice((d - 1) * 3, d * 3),
   }));
 
+  /** 课程总览：每门课现在到哪了（当前课 / 在学 / 未开始），点一行直接切过去 */
+  const overview = courses
+    .map((c) => {
+      let seen = 0;
+      let right = 0;
+      c.questions.forEach((q) => {
+        const p = state.progress[q.id];
+        if (p?.seen) {
+          seen += 1;
+          if (p.correct > 0) right += 1;
+        }
+      });
+      return {
+        course: c,
+        seen,
+        total: c.questions.length,
+        mastery: seen ? right / seen : 0,
+        current: c.id === course.id,
+      };
+    })
+    .sort((a, b) => {
+      if (a.current !== b.current) return a.current ? -1 : 1;
+      if ((a.seen > 0) !== (b.seen > 0)) return a.seen > 0 ? -1 : 1;
+      if (b.mastery !== a.mastery) return b.mastery - a.mastery;
+      return b.seen - a.seen;
+    });
+
+  const studying = overview.filter((o) => o.current || o.seen > 0).length;
+
   return (
     <div className="col">
+      <div className="card">
+        <div className="card-head">
+          <div className="card-title">
+            <span className="ico">🗂️</span>课程总览
+          </div>
+          <span className="card-note">
+            在学 {studying} 门 · 点一行切过去 · 只统计你已经练过的题
+          </span>
+        </div>
+        <div className="ov-list">
+          {overview.map((o) => {
+            const pct = Math.round(o.mastery * 100);
+            return (
+              <button
+                key={o.course.id}
+                className={`ov-row ${o.current ? 'on' : ''}`}
+                onClick={() => onSwitchCourse(o.course.id)}
+                aria-current={o.current}
+              >
+                <span className="ov-dot" style={{ background: o.course.color }}>
+                  {o.course.name.slice(0, 1)}
+                </span>
+                <span className="ov-main">
+                  <span className="ov-name">
+                    {o.course.name}
+                    <em className={`ov-src ${o.course.source.local ? 'local' : ''}`}>
+                      {o.course.source.tag}
+                    </em>
+                    {o.current && <span className="pill blue">当前在排</span>}
+                  </span>
+                  <span className="ov-meta">
+                    {o.course.kps.length} 考点 · {o.total} 题 ·{' '}
+                    {o.course.materials?.length ? `${o.course.materials.length} 份原件` : '通用资料'}
+                  </span>
+                </span>
+                <span className="ov-stat">
+                  <b>{o.seen ? `${pct}%` : '未开始'}</b>
+                  <i>
+                    {o.current
+                      ? `今日 ${plan.todayKps.length} 考点 / ${plan.dailyQuiz} 题`
+                      : o.seen
+                        ? `已练 ${o.seen}/${o.total}`
+                        : '未排考期'}
+                  </i>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
       <div className="topline">
         <div>
           <h1>冲刺计划</h1>
           <div className="sub">
             {course.name} · {plan.days} 天后考试 · 目标 {plan.target} 分
+          </div>
+          <div className="src-line">
+            📚 资料出处：
+            <b className={course.source.local ? 'src-local' : ''}>{course.source.school}</b> ·{' '}
+            {course.source.basis}
+            {course.materials?.length ? ` · ${course.materials.length} 份原件可下载` : ''}
           </div>
         </div>
         <div className="top-actions">

@@ -127,6 +127,11 @@ export const probability: Course = {
   name: '概率论与数理统计',
   short: '概率论',
   color: '#845EF7',
+  source: {
+    school: '多校通用',
+    tag: '通用',
+    basis: '公开教材 · 统考与期末常见题型，非某校真题',
+  },
   kps,
   questions,
 };

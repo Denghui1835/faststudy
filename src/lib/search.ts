@@ -9,7 +9,7 @@ import type { Course, KP, Question } from '../data/types';
  * - 排序看「命中位置的含金量」再叠加考频：命中考点名的题最该先看到。
  */
 
-export type HitLabel = '考点' | '题干' | '选项' | '讲解' | '章节';
+export type HitLabel = '考点' | '题干' | '选项' | '讲解' | '章节' | '出处';
 
 export interface SearchHit {
   /** courseId::qid，稳定的列表 key */
@@ -27,6 +27,31 @@ export interface SearchResult {
   hits: SearchHit[];
   /** 关键词（已归一化），交给高亮用 */
   tokens: string[];
+  /** 有没有生效的检索条件（关键词或分面），UI 用它决定要不要出结果区 */
+  active: boolean;
+}
+
+/**
+ * 分面（facet）：垂直领域的检索不是关键词一行，而是「学校 → 课程 → 考频」逐级收窄。
+ * 三级都能单独生效，也可以叠在一个搜索框上。
+ */
+export interface SearchFacets {
+  /** 只搜这门课；null / undefined = 不限 */
+  courseId?: string | null;
+  /** 只搜这个学校（按 source.school 精确匹配）；null = 不限 */
+  school?: string | null;
+  /** 只看这一档考频；null = 不限 */
+  heat?: 1 | 2 | 3 | null;
+}
+
+const hasFacet = (f: SearchFacets) =>
+  Boolean(f.courseId) || Boolean(f.school) || typeof f.heat === 'number';
+
+function facetOk(course: Course, kp: KP, f: SearchFacets): boolean {
+  if (f.courseId && course.id !== f.courseId) return false;
+  if (f.school && course.source.school !== f.school) return false;
+  if (typeof f.heat === 'number' && kp.heat !== f.heat) return false;
+  return true;
 }
 
 interface Field {
@@ -35,7 +60,7 @@ interface Field {
   weight: number;
 }
 
-const LABEL_ORDER: HitLabel[] = ['考点', '题干', '选项', '讲解', '章节'];
+const LABEL_ORDER: HitLabel[] = ['考点', '题干', '选项', '讲解', '章节', '出处'];
 
 const WEIGHTS = {
   kp: 6,
@@ -45,6 +70,7 @@ const WEIGHTS = {
   what: 1.4,
   why: 1.2,
   chapter: 1,
+  source: 1.6,
 };
 
 /**
@@ -82,7 +108,7 @@ function countOcc(hay: string, needle: string): number {
   return n;
 }
 
-function fieldsOf(q: Question, kp: KP): Field[] {
+function fieldsOf(q: Question, kp: KP, course: Course): Field[] {
   return [
     { label: '考点', text: kp.name, weight: WEIGHTS.kp },
     { label: '题干', text: q.stem, weight: WEIGHTS.stem },
@@ -90,6 +116,12 @@ function fieldsOf(q: Question, kp: KP): Field[] {
     { label: '讲解', text: q.explain.keep, weight: WEIGHTS.keep },
     { label: '讲解', text: `${q.explain.what} ${q.explain.why}`, weight: WEIGHTS.what },
     { label: '章节', text: kp.chapter, weight: WEIGHTS.chapter },
+    // 出处也进检索：打「农大」「本校卷」应该能直接筛出校本题源
+    {
+      label: '出处',
+      text: `${course.source.school} ${course.source.tag} ${course.source.basis}`,
+      weight: WEIGHTS.source,
+    },
   ];
 }
 
@@ -99,27 +131,41 @@ function labelRank(l: HitLabel): number {
 }
 
 /**
- * @param all 全部课程（范围选「全部课程」时用）
- * @param query 用户输入
- * @param courseId 只搜这一门课时传 id；搜全部传 null / undefined
+ * @param all 全部课程
+ * @param query 用户输入（可以为空，只要分面有选就出结果）
+ * @param facets 学校 / 课程 / 考频三级分面
  */
-export function searchBank(all: Course[], query: string, courseId?: string | null): SearchResult {
+export function searchBank(all: Course[], query: string, facets: SearchFacets = {}): SearchResult {
   const tokens = tokenize(query);
-  if (tokens.length === 0) return { hits: [], tokens };
-
   const needles = tokens.map(normChars).filter(Boolean);
-  if (needles.length === 0) return { hits: [], tokens };
+  const facetActive = hasFacet(facets);
+
+  // 没关键词但有分面：当成「按学校 / 考频浏览」，把命中的题按考频排出来
+  if (needles.length === 0) {
+    if (!facetActive) return { hits: [], tokens, active: false };
+    const browsed: SearchHit[] = [];
+    all.forEach((course) => {
+      const kpById = new Map(course.kps.map((k) => [k.id, k]));
+      course.questions.forEach((q) => {
+        const kp = kpById.get(q.kp);
+        if (!kp || !facetOk(course, kp, facets)) return;
+        browsed.push({ key: `${course.id}::${q.id}`, course, kp, q, score: kp.heat, labels: [] });
+      });
+    });
+    browsed.sort((a, b) => b.kp.heat - a.kp.heat || a.q.id.localeCompare(b.q.id));
+    return { hits: browsed, tokens, active: true };
+  }
+
   const phrase = needles.length > 1 ? needles.join('') : '';
 
   const hits: SearchHit[] = [];
 
   all.forEach((course) => {
-    if (courseId && course.id !== courseId) return;
     const kpById = new Map(course.kps.map((k) => [k.id, k]));
     course.questions.forEach((q) => {
       const kp = kpById.get(q.kp);
-      if (!kp) return;
-      const fields = fieldsOf(q, kp);
+      if (!kp || !facetOk(course, kp, facets)) return;
+      const fields = fieldsOf(q, kp, course);
       const texts = fields.map((f) => normChars(f.text));
       const union = texts.join('\u0000');
 
@@ -153,7 +199,7 @@ export function searchBank(all: Course[], query: string, courseId?: string | nul
     return a.q.id.localeCompare(b.q.id);
   });
 
-  return { hits, tokens };
+  return { hits, tokens, active: true };
 }
 
 /* ------------------------------------------------------------------ *
@@ -185,7 +231,9 @@ export function searchCourses(all: Course[], query: string): CourseSearchResult 
   const hits: CourseHit[] = [];
 
   all.forEach((course) => {
-    const nameText = normChars(`${course.name} ${course.short} ${course.id}`);
+    const nameText = normChars(
+      `${course.name} ${course.short} ${course.id} ${course.source.school} ${course.source.tag} ${course.source.basis}`,
+    );
     const kps = course.kps.map((kp) => ({
       kp,
       name: normChars(kp.name),

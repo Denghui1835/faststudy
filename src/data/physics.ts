@@ -144,6 +144,11 @@ export const physics: Course = {
   name: '大学物理',
   short: '大物',
   color: '#0CA678',
+  source: {
+    school: '多校通用',
+    tag: '通用',
+    basis: '公开教材 · 统考与期末常见题型，非某校真题',
+  },
   kps,
   questions,
 };

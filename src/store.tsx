@@ -19,6 +19,8 @@ export interface State {
   progress: Progress;
   /** 错题本：qid -> 错了几次 */
   mistakes: Record<string, number>;
+  /** 收藏夹（爱心）：qid -> true */
+  favs: Record<string, true>;
   today: TodayState;
   total: { quiz: number; correct: number; seconds: number };
   streak: { count: number; last: string };
@@ -34,6 +36,7 @@ export type Action =
   | { type: 'lifesaver'; on: boolean }
   | { type: 'settings'; settings: AiSettings }
   | { type: 'clearMistakes' }
+  | { type: 'fav'; qid: string; on: boolean }
   | { type: 'exam'; record: ExamRecord }
   | { type: 'examMistakes'; qids: string[] }
   | { type: 'reset' }
@@ -52,6 +55,7 @@ const initialState: State = {
   exam: null,
   progress: {},
   mistakes: {},
+  favs: {},
   today: emptyToday(),
   total: { quiz: 0, correct: 0, seconds: 0 },
   streak: { count: 0, last: '' },
@@ -117,6 +121,12 @@ function reducer(state: State, action: Action): State {
       return { ...state, settings: action.settings };
     case 'clearMistakes':
       return { ...state, mistakes: {} };
+    case 'fav': {
+      const favs = { ...state.favs };
+      if (action.on) favs[action.qid] = true;
+      else delete favs[action.qid];
+      return { ...state, favs };
+    }
     case 'exam':
       return { ...state, exams: [action.record, ...(state.exams ?? [])].slice(0, 20) };
     case 'examMistakes': {

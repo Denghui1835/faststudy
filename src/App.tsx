@@ -112,7 +112,18 @@ function Shell() {
         )}
 
         {tab === 'plan' && (
-          <PlanPage course={course} plan={plan} onStart={() => start('normal')} onRetake={() => setTab('me')} />
+          <PlanPage
+            course={course}
+            plan={plan}
+            onStart={() => start('normal')}
+            onRetake={() => setTab('me')}
+            onSwitchCourse={(id) =>
+              dispatch({
+                type: 'retake',
+                exam: { ...(state.exam as NonNullable<typeof state.exam>), courseId: id },
+              })
+            }
+          />
         )}
 
         {tab === 'bank' && (

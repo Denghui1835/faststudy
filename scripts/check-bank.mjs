@@ -1,6 +1,6 @@
 // 题库完整性校验：用 vite 的 lib 模式把 TS 数据打成单个 ESM，再跑断言
 import { build } from 'vite';
-import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -27,9 +27,23 @@ let fail = 0;
 const bad = (m) => { console.log('FAIL ' + m); fail++; };
 
 const ids = new Set();
+const schools = new Map();
 for (const c of courses) {
   if (!c.id || !c.name || !c.short || !c.color) bad(`course missing meta: ${JSON.stringify(c.id)}`);
   if (!/^#[0-9A-Fa-f]{6}$/.test(c.color)) bad(`bad color ${c.id}: ${c.color}`);
+
+  // 资料出处：每门课都必须写清楚是哪个学校的、凭什么
+  const src = c.source;
+  if (!src || !src.school || !src.tag || !src.basis) bad(`missing source on ${c.id}`);
+  else if (src.tag.length > 4) bad(`source.tag too long on ${c.id}: ${src.tag}`);
+  if (src) schools.set(src.school, (schools.get(src.school) ?? 0) + 1);
+
+  // 资料原稿：声明了就必须真有文件，否则页面上会出现死链
+  (c.materials ?? []).forEach((m) => {
+    const p = join('public', m.file);
+    if (!existsSync(p)) bad(`material file missing: ${m.file}`);
+    if (!m.size) bad(`material missing size: ${m.id}`);
+  });
   const kpIds = new Set(c.kps.map((k) => k.id));
   if (kpIds.size !== c.kps.length) bad(`dup kp id in ${c.id}`);
   for (const k of c.kps) {

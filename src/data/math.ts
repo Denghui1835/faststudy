@@ -149,6 +149,11 @@ export const advancedMath: Course = {
   name: '高等数学',
   short: '高数',
   color: '#FF6B4A',
+  source: {
+    school: '多校通用',
+    tag: '通用',
+    basis: '公开教材 · 统考与期末常见题型，非某校真题',
+  },
   kps,
   questions,
 };
