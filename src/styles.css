@@ -1277,8 +1277,21 @@ p {
 
 .chips {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 8px;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+
+.chips::-webkit-scrollbar {
+  display: none;
+}
+
+.chips .chip {
+  flex: none;
 }
 
 .chip {
@@ -1859,12 +1872,106 @@ mark.hl {
   color: inherit;
 }
 
+/* 课程检索结果 */
+.course-hits {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.course-hit {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 11px 13px;
+  border-radius: var(--r-md);
+  background: #fff;
+  border: 1.5px solid var(--line);
+  text-align: left;
+  transition: all 0.16s;
+}
+
+.course-hit:hover {
+  border-color: #cfd8ea;
+  background: #fffdf8;
+}
+
+.course-hit.on {
+  border-color: var(--blue);
+  background: var(--blue-soft);
+}
+
+.course-hit .course-dot {
+  margin-bottom: 0;
+  flex: none;
+}
+
+.course-hit-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.course-hit-name {
+  font-size: 13.5px;
+  font-weight: 800;
+}
+
+.course-hit-name em {
+  margin-left: 7px;
+  padding: 0 7px;
+  border: 1px solid var(--line-2);
+  border-radius: 99px;
+  font-style: normal;
+  font-size: 10.5px;
+  font-weight: 800;
+  color: var(--ink-3);
+}
+
+.course-hit-meta {
+  font-size: 11.5px;
+  color: var(--ink-3);
+}
+
+.course-hit-kps {
+  font-size: 11.5px;
+  color: var(--ink-2);
+}
+
+.course-hit-go {
+  flex: none;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: var(--blue);
+}
+
 @media (max-width: 860px) {
   .sr-head {
     padding: 11px 0;
   }
   .search-bar input[type='search'] {
     padding-left: 34px;
+  }
+  /* 课程一多，顶部标题和 chip 抢空间：标题独占一行，chip 横向滚动 */
+  .bank-top {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .bank-top .chips {
+    width: 100%;
+  }
+  /* 卡片标题不允许折行，说明文字让到下一行 */
+  .card-head {
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+  .card-title {
+    white-space: nowrap;
   }
 }
 

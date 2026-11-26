@@ -156,6 +156,85 @@ export function searchBank(all: Course[], query: string, courseId?: string | nul
   return { hits, tokens };
 }
 
+/* ------------------------------------------------------------------ *
+ * 课程检索：课程会越来越多（现在 8 门，以后 20 门），所以要能「找课」
+ * 而不是只能在一排 chip 里翻。搜课名 / 简称 / 考点名 / 章节都能找到课。
+ * ------------------------------------------------------------------ */
+
+export interface CourseHit {
+  course: Course;
+  score: number;
+  /** 这门课里被关键词命中的考点，用来回答「我要找的那个点在哪个课」 */
+  matchedKps: KP[];
+  /** 课名或简称本身命中 */
+  nameMatched: boolean;
+}
+
+export interface CourseSearchResult {
+  hits: CourseHit[];
+  tokens: string[];
+}
+
+export function searchCourses(all: Course[], query: string): CourseSearchResult {
+  const tokens = tokenize(query);
+  if (tokens.length === 0) return { hits: [], tokens };
+
+  const needles = tokens.map(normChars).filter(Boolean);
+  if (needles.length === 0) return { hits: [], tokens };
+
+  const hits: CourseHit[] = [];
+
+  all.forEach((course) => {
+    const nameText = normChars(`${course.name} ${course.short} ${course.id}`);
+    const kps = course.kps.map((kp) => ({
+      kp,
+      name: normChars(kp.name),
+      chapter: normChars(kp.chapter),
+    }));
+    const union = [nameText, ...kps.map((k) => `${k.name} ${k.chapter}`)].join('\u0000');
+
+    // AND：每个关键词都要能在「课名 / 任一考点 / 章节」里找到
+    if (!needles.every((t) => union.includes(t))) return;
+
+    let score = 0;
+    let nameMatched = false;
+    needles.forEach((t) => {
+      const n = countOcc(nameText, t);
+      if (n) {
+        // 课名命中远重于考点命中：用户打「线代」是想找课，不是找题
+        score += 8 * (1 + Math.min(n - 1, 2) * 0.1);
+        nameMatched = true;
+      }
+    });
+
+    const matchedKps: KP[] = [];
+    kps.forEach(({ kp, name, chapter }) => {
+      let hit = false;
+      needles.forEach((t) => {
+        if (countOcc(name, t)) {
+          score += 3;
+          hit = true;
+        } else if (countOcc(chapter, t)) {
+          score += 1;
+          hit = true;
+        }
+      });
+      if (hit) matchedKps.push(kp);
+    });
+
+    hits.push({ course, score, matchedKps, nameMatched });
+  });
+
+  hits.sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    // 同分时考点多的课更可能是用户想要的那门「大课」
+    if (b.course.kps.length !== a.course.kps.length) return b.course.kps.length - a.course.kps.length;
+    return b.course.questions.length - a.course.questions.length;
+  });
+
+  return { hits, tokens };
+}
+
 export interface Segment {
   text: string;
   hit: boolean;

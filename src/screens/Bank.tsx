@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Course } from '../data/types';
 import { courses } from '../data';
-import { searchBank, segments } from '../lib/search';
+import { searchBank, searchCourses, segments } from '../lib/search';
 import type { Plan } from '../lib/plan';
 import { useStore } from '../store';
 
@@ -51,6 +51,12 @@ export default function Bank({
   const [limit, setLimit] = useState(PAGE);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // 课程检索：课程会变多，先让用户把「课」找出来，再谈搜题
+  const [courseQuery, setCourseQuery] = useState('');
+  const courseRef = useRef<HTMLInputElement>(null);
+  const courseResult = useMemo(() => searchCourses(courses, courseQuery), [courseQuery]);
+  const courseSearching = courseResult.tokens.length > 0;
+
   const result = useMemo(
     () => searchBank(courses, query, scopeAll ? null : course.id),
     [query, scopeAll, course.id],
@@ -73,22 +79,29 @@ export default function Bank({
     setOpenKey(null);
   };
 
-  // 「/」聚焦搜索框，Esc 清空 —— 桌面端刷题库时手不用离开键盘
+  // 键盘：1 聚焦课程检索、2 聚焦关键词检索，Esc 清空当前框
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const el = e.target as HTMLElement | null;
       const typing =
         !!el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
-      if (e.key === '/' && !typing) {
+
+      if (!typing && (e.key === '1' || e.key === '2')) {
         e.preventDefault();
-        inputRef.current?.focus();
+        (e.key === '1' ? courseRef : inputRef).current?.focus();
         return;
       }
-      if (e.key === 'Escape' && document.activeElement === inputRef.current) {
-        setQuery('');
-        setLimit(PAGE);
-        setOpenKey(null);
-        inputRef.current?.blur();
+
+      if (e.key === 'Escape') {
+        if (document.activeElement === courseRef.current) {
+          setCourseQuery('');
+          courseRef.current?.blur();
+        } else if (document.activeElement === inputRef.current) {
+          setQuery('');
+          setLimit(PAGE);
+          setOpenKey(null);
+          inputRef.current?.blur();
+        }
       }
     };
     window.addEventListener('keydown', onKey);
@@ -99,7 +112,7 @@ export default function Bank({
 
   return (
     <div className="col">
-      <div className="topline">
+      <div className="topline bank-top">
         <div>
           <h1>题库</h1>
           <div className="sub">
@@ -122,9 +135,108 @@ export default function Bank({
       <div className="card">
         <div className="card-head">
           <div className="card-title">
-            <span className="ico">🔍</span>题库检索
+            <span className="ico">🎓</span>课程检索
           </div>
-          <span className="card-note">题干 / 选项 / 讲解 / 考点，一处搜全套</span>
+          <span className="card-note">
+            {courses.length} 门课 · 课名 / 简称 / 考点 / 章节都能找 · 按 1 聚焦
+          </span>
+        </div>
+
+        <div className="search-bar">
+          <span className="search-ico" aria-hidden="true">
+            🎓
+          </span>
+          <input
+            ref={courseRef}
+            type="search"
+            value={courseQuery}
+            onChange={(e) => setCourseQuery(e.target.value)}
+            placeholder="找课程：课名、简称，或者任意考点（例：线代 / 二叉树）"
+            aria-label="检索课程"
+          />
+          {courseQuery && (
+            <button
+              className="search-clear"
+              onClick={() => {
+                setCourseQuery('');
+                courseRef.current?.focus();
+              }}
+            >
+              清除
+            </button>
+          )}
+        </div>
+
+        {!courseSearching && (
+          <div className="search-hint">
+            <span className="muted">课程多了不用翻：</span>
+            {courses.slice(0, 4).map((c) => (
+              <button key={c.id} className="kw" onClick={() => setCourseQuery(c.short)}>
+                {c.short}
+              </button>
+            ))}
+            <span className="muted">…直接搜课名或考点名</span>
+          </div>
+        )}
+
+        {courseSearching && courseResult.hits.length === 0 && (
+          <div className="empty" style={{ padding: '20px 0 6px' }}>
+            <div className="empty-title">没有匹配的课程</div>
+            <div className="empty-text">
+              换个说法试试（课名 / 简称 / 考点名都行），或者去下面的「其他课程」里翻。
+            </div>
+          </div>
+        )}
+
+        {courseResult.hits.length > 0 && (
+          <div className="course-hits">
+            {courseResult.hits.map((h) => (
+              <button
+                key={h.course.id}
+                className={`course-hit ${h.course.id === course.id ? 'on' : ''}`}
+                onClick={() => {
+                  onSwitchCourse(h.course.id);
+                  setCourseQuery('');
+                }}
+              >
+                <span className="course-dot" style={{ background: h.course.color }}>
+                  {h.course.name.slice(0, 1)}
+                </span>
+                <span className="course-hit-main">
+                  <span className="course-hit-name">
+                    <Marked text={h.course.name} tokens={courseResult.tokens} />
+                    {h.course.short !== h.course.name && <em>{h.course.short}</em>}
+                  </span>
+                  <span className="course-hit-meta">
+                    {h.course.kps.length} 考点 · {h.course.questions.length} 题
+                    {h.course.id === course.id ? ' · 当前课程' : ''}
+                  </span>
+                  {h.matchedKps.length > 0 && (
+                    <span className="course-hit-kps">
+                      相关考点：
+                      {h.matchedKps
+                        .slice(0, 4)
+                        .map((k) => k.name)
+                        .join(' / ')}
+                      {h.matchedKps.length > 4 ? ` 等 ${h.matchedKps.length} 个` : ''}
+                    </span>
+                  )}
+                </span>
+                <span className="course-hit-go">
+                  {h.course.id === course.id ? '在用' : '进入 →'}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="card">
+        <div className="card-head">
+          <div className="card-title">
+            <span className="ico">🔍</span>关键词检索
+          </div>
+          <span className="card-note">题干 / 选项 / 讲解 / 考点，一处搜全套 · 按 2 聚焦</span>
         </div>
 
         <div className="search-bar">
@@ -136,8 +248,8 @@ export default function Bank({
             type="search"
             value={query}
             onChange={(e) => changeQuery(e.target.value)}
-            placeholder="搜考点、题干、选项或讲解…（按 / 快速聚焦，多个词用空格隔开）"
-            aria-label="检索题库"
+            placeholder="搜题干、选项或讲解…（多个词用空格隔开）"
+            aria-label="关键词检索题库"
           />
           {query && (
             <button
