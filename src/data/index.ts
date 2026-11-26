@@ -8,8 +8,9 @@ import { english } from './english';
 import { physics } from './physics';
 import { network } from './network';
 import { extra } from './extra';
+import { engineeringDrawing } from './drawing';
 
-const raw = [dataStructure, advancedMath, linearAlgebra, probability, marxism, english, physics, network];
+const raw = [dataStructure, advancedMath, linearAlgebra, probability, marxism, english, physics, network, engineeringDrawing];
 
 /**
  * 把 extra 里按课程 id 追加的题目合进各课程；

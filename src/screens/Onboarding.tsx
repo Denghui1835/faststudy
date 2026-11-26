@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { courses, courseById } from '../data';
+import { courses, courseById, totalQuestions } from '../data';
 import type { Basis } from '../lib/plan';
 import { BASIS_LABEL, pickMode, MODE_META } from '../lib/plan';
 import { useStore } from '../store';
@@ -65,7 +65,9 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
               </div>
             </div>
           </div>
-          <div className="pitch-foot">8 门课 · 152 道原创题 · 纯离线可用 · 模型算力自带</div>
+          <div className="pitch-foot">
+            {courses.length} 门课 · {totalQuestions} 道原创题 · 纯离线可用 · 模型算力自带
+          </div>
         </aside>
 
         <div className="onboard">
